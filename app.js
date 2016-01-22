@@ -6,12 +6,13 @@
 var express = require('express'),
   bodyParser = require('body-parser'),
   methodOverride = require('method-override'),
-  errorHandler = require('error-handler'),
+  errorHandler = require('express-error-handler'),
   morgan = require('morgan'),
   routes = require('./routes'),
   api = require('./routes/api'),
   http = require('http'),
-  path = require('path');
+  path = require('path'),
+  login = require('./routes/login');
 
 var app = module.exports = express();
 
@@ -33,7 +34,7 @@ var env = process.env.NODE_ENV || 'development';
 
 // development only
 if (env === 'development') {
-  app.use(express.errorHandler());
+  app.use(errorHandler());
 }
 
 // production only
@@ -50,12 +51,17 @@ if (env === 'production') {
 app.get('/', routes.index);
 app.get('/partials/:name', routes.partials);
 
+app.get('/login', login.form);
+app.post('/login', login.submit);
+app.get('/logout', login.logout);
+
 // JSON API
 app.get('/api/name', api.name);
 
+app.get('/api/inflation', api.name);
+
 // redirect all others to the index (HTML5 history)
 app.get('*', routes.index);
-
 
 /**
  * Start Server
